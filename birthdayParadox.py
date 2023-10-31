@@ -1,55 +1,61 @@
 # Exercise 3: The Birthday Paradox
 
-# Step 1: Random Birthday Generator
 import random
-def birthdays(n):
-    lst = []
-    newlst = []
-    for i in range(1,366):
-        lst.append(i)
-    for day in lst:
-        day = random.choice(lst)
-        newlst.append(day)
-        
-    return newlst[:n]
 
-# Step 2: Duplicate Detector in a List
-def duplicateDetector(n):
-    birthdayFreq = []
-    duplst = []
-    for birthday in n:
-        if birthday not in birthdayFreq:
-            birthdayFreq.append(birthday)
-        else:
-            duplst.append(birthday) 
+# Step 1: Generate a list of random birthdays
+def generateBirthdays(n):
+    birthdays = []
+    for i in range(n):
+        birthdays.append(random.randint(1,366))
+    return birthdays
 
-    if birthday in duplst:
-        return True
-    else:
-        return False
+# Step 2: Check for duplicates in a list using list functions
+def duplicateDetector(lst):
+    for i in range(len(lst)):
+        for j in range(i + 1, len(lst)):
+            if lst[i] == lst[j]:
+                return True
+    return False
 
-# Step 3: Single Trial 
+# Step 3: Single trial
 def singleTrial(n):
-    size = birthdays(n)
-    test = duplicateDetector(size)
-    if test == True:
-        return True
-    elif test == False:
-        return False
+    birthdays = generateBirthdays(n)
+    has_duplicate = duplicateDetector(birthdays)
 
-# Step 4: Solution (putting it all together)
-def birthdayParadox(m,n):
-    df = 0
-    for i in range(1,m):
-        trials = singleTrial(i)
-        if trials == True:
-            df += 1
-        else:
-            df += 0
-    
+    # Bonus: Count how many birthdays fall on each day
+    day_counts = [0] * 366
+    for day in birthdays:
+        day_counts[day - 1] += 1
+
+    duplicate_days = []
+    for day in range(366):
+        count = day_counts[day]
+        if count > 1:
+            duplicate_days.append((day + 1, count))
+
+    return has_duplicate, birthdays, duplicate_days
+
+# Step 4: Put it all together
+def birthdayParadox(m, n):
+    duplicates_count = 0
+    for _ in range(m):
+        has_duplicate, birthdays, duplicate_days = singleTrial(n)
+        if has_duplicate:
+            duplicates_count += 1
+
+            for day, count in duplicate_days:
+                print(f"There were {count} birthdays on day {day}")
+
     if n == 23:
         theoretical = 50
     elif n == 70:
         theoretical = 99.9
-    actual = round((((df)/(m))*100),1)
-    print(f"The actual percentage of duplicate birthdays was {actual}% compared to the theoretical {theoretical}%")
+    else:
+        theoretical = 0
+
+    actual = round(((duplicates_count / m) * 100),2)
+    print(f"Percentage of trials with duplicate birthdays: {actual}% compared to the theoretical {theoretical}%")
+
+
+# Example
+birthdayParadox(10000, 23)
